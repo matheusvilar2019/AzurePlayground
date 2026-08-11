@@ -14,6 +14,6 @@ namespace AzurePlayground.Domain.Interfaces
 
         Task<Document> Create(Document document);
         Task<Document> Update(Document document);
-        Task<Document> Delete(Document document);
+        Task<Document> Remove(Document document);
     }
 }
