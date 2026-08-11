@@ -1,4 +1,7 @@
-﻿using AzurePlayground.Domain.Interfaces;
+﻿using AzurePlayground.Application.Interfaces;
+using AzurePlayground.Application.Mappings;
+using AzurePlayground.Application.Services;
+using AzurePlayground.Domain.Interfaces;
 using AzurePlayground.Infra.Data.Context;
 using AzurePlayground.Infra.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +24,11 @@ namespace AzurePlayground.Infra.IoC
             ), b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
 
             services.AddScoped<IDocumentRepository, DocumentRepository>();
+            services.AddScoped<IDocumentService, DocumentService>();
+            services.AddAutoMapper(cfg =>
+            {
+                cfg.AddProfile<DomainToDTOMappingProfile>();
+            });
 
             return services;
         }
