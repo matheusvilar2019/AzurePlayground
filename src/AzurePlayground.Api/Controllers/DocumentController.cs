@@ -1,5 +1,5 @@
 ﻿using AzurePlayground.Application.DTOs;
-using AzurePlayground.Application.Services;
+using AzurePlayground.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AzurePlayground.Api.Controllers
