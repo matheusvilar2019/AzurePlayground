@@ -21,6 +21,7 @@ namespace AzurePlayground.Domain.Entities
 
         public Document(string originalFileName, string blobName, string container, string contentType, int size, string status)
         {
+            UploadedAt = DateTime.Now;
             ValidateDomain(originalFileName, blobName, container, contentType, size, status);
         }
 
@@ -28,6 +29,7 @@ namespace AzurePlayground.Domain.Entities
         {
             DomainExceptionValidation.When(id < 0, "Invalid Id value");
             Id = id;
+            UploadedAt = DateTime.Now;
             ValidateDomain(originalFileName, blobName, container, contentType, size, status);
         }
 

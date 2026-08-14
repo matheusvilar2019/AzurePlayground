@@ -35,14 +35,23 @@ namespace AzurePlayground.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult> Add([FromBody] DocumentDTO documentDTO)
+        public async Task<ActionResult<DocumentDTO>> Add(IFormFile file)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            if (file == null || file.Length == 0)
+                return BadRequest("File is required.");
 
-            await _documentService.Add(documentDTO);
+            await using var stream = file.OpenReadStream();
 
-            return Ok();
+            var documentUploadDTO = new DocumentUploadDTO
+            {
+                OriginalFileName = file.FileName,
+                ContentType = file.ContentType,
+                Content = stream
+            };
+
+            var document = await _documentService.Add(documentUploadDTO);
+
+            return Ok(document);
         }
 
         [HttpPut]

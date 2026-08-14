@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AzurePlayground.Application.DTOs;
 using AzurePlayground.Application.Interfaces;
+using AzurePlayground.Application.Validators;
 using AzurePlayground.Domain.Entities;
 using AzurePlayground.Domain.Interfaces;
 using System;
@@ -14,13 +15,14 @@ namespace AzurePlayground.Application.Services
     public class DocumentService : IDocumentService
     {
         private IDocumentRepository _documentRepository;
+        private readonly IDocumentStorage _documentStorage;
         private readonly IMapper _mapper;
 
-        public DocumentService(IMapper mapper, IDocumentRepository documentRepository)
+        public DocumentService(IMapper mapper, IDocumentRepository documentRepository, IDocumentStorage documentStorage)
         {
             _documentRepository = documentRepository ??
                 throw new ArgumentNullException(nameof(documentRepository));
-
+            _documentStorage = documentStorage;
             _mapper = mapper;
         }
 
@@ -36,10 +38,40 @@ namespace AzurePlayground.Application.Services
             return _mapper.Map<DocumentDTO>(documentEntity);
         }
 
-        public async Task Add(DocumentDTO documentDTO)
+        public async Task<DocumentDTO> Add(DocumentUploadDTO documentUploadDTO)
         {
-            var documentEntity = _mapper.Map<Document>(documentDTO);
-            await _documentRepository.CreateAsync(documentEntity);
+            DocumentValidator.Validate(documentUploadDTO);
+
+            var blobName = $"{Guid.NewGuid()}{Path.GetExtension(documentUploadDTO.OriginalFileName)}";
+
+            var container = "documents";
+
+            var size = documentUploadDTO.Content.Length;
+
+            var document = new Document(
+                documentUploadDTO.OriginalFileName,
+                blobName,
+                container,
+                documentUploadDTO.ContentType,
+                (int)size,
+                "Active");
+
+            await _documentStorage.UploadAsync(
+                documentUploadDTO.Content,
+                blobName,
+                documentUploadDTO.ContentType);
+
+            try
+            {
+                var documentEntity = await _documentRepository.CreateAsync(document);
+
+                return _mapper.Map<DocumentDTO>(documentEntity);
+            }
+            catch
+            {
+                await _documentStorage.DeleteAsync(blobName);
+                throw;
+            }
         }
 
         public async Task Update(DocumentDTO documentDTO)
