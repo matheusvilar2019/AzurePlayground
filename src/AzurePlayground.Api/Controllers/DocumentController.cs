@@ -49,6 +49,17 @@ namespace AzurePlayground.Api.Controllers
                 );
         }
 
+        [HttpGet("admin/{id:int}")]
+        public async Task<ActionResult<DocumentAdminDTO>> GetAdminInfo(int id)
+        {
+            var document = await _documentService.GetAdminInfo(id);
+
+            if (document == null)
+                return NotFound();
+
+            return Ok(document);
+        }
+
         [HttpPost]
         public async Task<ActionResult<DocumentDTO>> Add(IFormFile file)
         {
