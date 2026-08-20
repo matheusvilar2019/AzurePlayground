@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AzurePlayground.Application.Storage;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,5 +22,9 @@ namespace AzurePlayground.Application.Interfaces
         Task DeleteAsync(
             string fileName,
             CancellationToken cancellationToken = default);
+
+        Task<DocumentStorageInfo> GetInfoAsync(
+            string container,
+            string blobName);
     }
 }

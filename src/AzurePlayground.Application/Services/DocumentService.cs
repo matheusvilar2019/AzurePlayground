@@ -38,6 +38,35 @@ namespace AzurePlayground.Application.Services
             return _mapper.Map<DocumentListDTO>(documentEntity);
         }
 
+        public async Task<DocumentAdminDTO> GetAdminInfo(int id)
+        {
+            var document = await _documentRepository.GetByIdAsync(id);
+
+            if (document == null)
+                return new DocumentAdminDTO();
+
+            var storageInfo = await _documentStorage.GetInfoAsync(
+                document.Container,
+                document.BlobName);
+
+            return new DocumentAdminDTO
+            {
+                Id = document.Id,
+                OriginalFileName = document.OriginalFileName,
+                BlobName = document.BlobName,
+                Container = document.Container,
+                Size = storageInfo.ContentLength,
+                ContentType = storageInfo.ContentType,
+                UploadedAt = document.UploadedAt,
+                Metadata = storageInfo.Metadata,
+                ETag = storageInfo.ETag,
+                Url = storageInfo.Url,
+                LastModified = storageInfo.LastModified,
+                BlobType = storageInfo.BlobType,
+                AccessTier = storageInfo.AccessTier
+            };
+        }
+
         public async Task<DocumentDTO> Add(DocumentUploadDTO documentUploadDTO)
         {
             DocumentValidator.Validate(documentUploadDTO);

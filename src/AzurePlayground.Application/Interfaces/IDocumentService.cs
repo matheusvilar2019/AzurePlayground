@@ -11,6 +11,7 @@ namespace AzurePlayground.Application.Interfaces
     {
         Task<IEnumerable<DocumentListDTO>> GetDocuments();
         Task<DocumentListDTO> GetById(int id);
+        Task<DocumentAdminDTO> GetAdminInfo(int id);
         Task<DocumentDTO> Add(DocumentUploadDTO document);
         Task<DocumentDownloadDTO?> Download(int id);
         Task Update(DocumentDTO documentDTO);

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AzurePlayground.Application.Interfaces;
+using AzurePlayground.Application.Storage;
 
 namespace AzurePlayground.Infra.Data.Storage
 {
@@ -20,6 +21,28 @@ namespace AzurePlayground.Infra.Data.Storage
             _containerClient = blobServiceClient.GetBlobContainerClient(containerName);
         }
 
+        public async Task<DocumentStorageInfo> GetInfoAsync(
+            string container,
+            string blobName)
+        {
+            var blobClient =
+                _containerClient.GetBlobClient(blobName);
+
+            var properties = await blobClient.GetPropertiesAsync();
+
+            return new DocumentStorageInfo
+            {
+                ContentLength = properties.Value.ContentLength,
+                ContentType = properties.Value.ContentType,
+                Metadata = properties.Value.Metadata,
+                ETag = properties.Value.ETag.ToString(),
+                Url = blobClient.Uri.ToString(),
+                LastModified = properties.Value.LastModified,
+                BlobType = properties.Value.BlobType.ToString(),
+                AccessTier = properties.Value.AccessTier,
+            };
+        }
+
         public async Task UploadAsync(
             Stream content,
             string fileName,
@@ -31,12 +54,19 @@ namespace AzurePlayground.Infra.Data.Storage
 
             var blobClient = _containerClient.GetBlobClient(fileName);
 
+            var metadata = new Dictionary<string, string>
+            {
+                ["documentType"] = "contract",
+                ["department"] = "legal"
+            };
+
             await blobClient.UploadAsync(
                 content,
                 new BlobHttpHeaders
                 {
                     ContentType = contentType
                 },
+                metadata,
                 cancellationToken: cancellationToken);
         }
 

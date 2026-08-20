@@ -15,17 +15,17 @@ namespace AzurePlayground.Domain.Entities
         public string BlobName { get; private set; }
         public string Container { get; private set; }
         public string ContentType { get; private set; }
-        public int Size { get; private set; }
+        public long Size { get; private set; }
         public DateTime UploadedAt { get; private set; }
         public string Status { get; private set; }
 
-        public Document(string originalFileName, string blobName, string container, string contentType, int size, string status)
+        public Document(string originalFileName, string blobName, string container, string contentType, long size, string status)
         {
             UploadedAt = DateTime.Now;
             ValidateDomain(originalFileName, blobName, container, contentType, size, status);
         }
 
-        public Document(int id, string originalFileName, string blobName, string container, string contentType, int size, string status)
+        public Document(int id, string originalFileName, string blobName, string container, string contentType, long size, string status)
         {
             DomainExceptionValidation.When(id < 0, "Invalid Id value");
             Id = id;
@@ -33,12 +33,12 @@ namespace AzurePlayground.Domain.Entities
             ValidateDomain(originalFileName, blobName, container, contentType, size, status);
         }
 
-        public void Update(string originalFileName, string blobName, string container, string contentType, int size, string status)
+        public void Update(string originalFileName, string blobName, string container, string contentType, long size, string status)
         {
             ValidateDomain(originalFileName, blobName, container, contentType, size, status);
         }
 
-        private void ValidateDomain(string originalFileName, string blobName, string container, string contentType, int size, string status)
+        private void ValidateDomain(string originalFileName, string blobName, string container, string contentType, long size, string status)
         {
             DomainExceptionValidation.When(string.IsNullOrEmpty(originalFileName),
                 "Invalid original file name. Original file name is required");

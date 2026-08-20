@@ -39,7 +39,7 @@ namespace AzurePlayground.Application.DTOs
         [Required(ErrorMessage = "The Stock is Required")]
         [Range(1, 9999)]
         [DisplayName("Size")]
-        public int Size { get; set; }
+        public long Size { get; set; }
 
 
         [Required(ErrorMessage = "The UploadedAt is Required")]
