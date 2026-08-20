@@ -26,16 +26,16 @@ namespace AzurePlayground.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<DocumentDTO>> GetDocuments()
+        public async Task<IEnumerable<DocumentListDTO>> GetDocuments()
         {
             var documentsEntity = await _documentRepository.GetDocumentsAsync();
-            return _mapper.Map<IEnumerable<DocumentDTO>>(documentsEntity);
+            return _mapper.Map<IEnumerable<DocumentListDTO>>(documentsEntity);
         }
 
-        public async Task<DocumentDTO> GetById(int id)
+        public async Task<DocumentListDTO> GetById(int id)
         {
             var documentEntity = await _documentRepository.GetByIdAsync(id);
-            return _mapper.Map<DocumentDTO>(documentEntity);
+            return _mapper.Map<DocumentListDTO>(documentEntity);
         }
 
         public async Task<DocumentDTO> Add(DocumentUploadDTO documentUploadDTO)

@@ -14,6 +14,10 @@ namespace AzurePlayground.Application.Mappings
         public DomainToDTOMappingProfile()
         {
             CreateMap<Document, DocumentDTO>().ReverseMap();
+
+            CreateMap<Document, DocumentListDTO>().ForMember(
+                dest => dest.FileName,
+                opt => opt.MapFrom(src => src.OriginalFileName));
         }
     }
 }

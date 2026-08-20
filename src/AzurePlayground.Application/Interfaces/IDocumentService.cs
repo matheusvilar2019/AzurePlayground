@@ -9,8 +9,8 @@ namespace AzurePlayground.Application.Interfaces
 {
     public interface IDocumentService
     {
-        Task<IEnumerable<DocumentDTO>> GetDocuments();
-        Task<DocumentDTO> GetById(int id);
+        Task<IEnumerable<DocumentListDTO>> GetDocuments();
+        Task<DocumentListDTO> GetById(int id);
         Task<DocumentDTO> Add(DocumentUploadDTO document);
         Task<DocumentDownloadDTO?> Download(int id);
         Task Update(DocumentDTO documentDTO);

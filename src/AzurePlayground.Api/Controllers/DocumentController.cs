@@ -16,7 +16,7 @@ namespace AzurePlayground.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DocumentDTO>>> GetDocuments()
+        public async Task<ActionResult<IEnumerable<DocumentListDTO>>> GetDocuments()
         {
             var documents = await _documentService.GetDocuments();
 
@@ -24,7 +24,7 @@ namespace AzurePlayground.Api.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<DocumentDTO>> GetById(int id)
+        public async Task<ActionResult<DocumentListDTO>> GetById(int id)
         {
             var document = await _documentService.GetById(id);
 
@@ -32,6 +32,21 @@ namespace AzurePlayground.Api.Controllers
                 return NotFound();
 
             return Ok(document);
+        }
+
+        [HttpGet("download/{id:int}")]
+        public async Task<ActionResult> Download(int id)
+        {
+            var documentDownloadDTO = await _documentService.Download(id);
+
+            if (documentDownloadDTO == null)
+                return NotFound();
+
+            return File(
+                documentDownloadDTO.Content,
+                documentDownloadDTO.ContentType,
+                documentDownloadDTO.FileName
+                );
         }
 
         [HttpPost]
@@ -52,32 +67,6 @@ namespace AzurePlayground.Api.Controllers
             var document = await _documentService.Add(documentUploadDTO);
 
             return Ok(document);
-        }
-
-        [HttpGet("download/{id:int}")]
-        public async Task<ActionResult> Download(int id)
-        {
-            var documentDownloadDTO = await _documentService.Download(id);
-
-            if (documentDownloadDTO == null)
-                return NotFound();
-
-            return File(
-                documentDownloadDTO.Content,
-                documentDownloadDTO.ContentType,
-                documentDownloadDTO.FileName
-                );
-        }
-
-        [HttpPut]
-        public async Task<ActionResult> Update([FromBody] DocumentDTO documentDTO)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            await _documentService.Update(documentDTO);
-
-            return Ok();
         }
 
         [HttpDelete("{id:int}")]
