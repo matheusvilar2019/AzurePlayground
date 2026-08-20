@@ -260,5 +260,134 @@ namespace AzurePlayground.Application.Tests
                     It.IsAny<CancellationToken>()),
                 Times.Never);
         }
+
+        [Fact]
+        public async Task Remove_ShouldReturnFalse_WhenDocumentDoesNotExist()
+        {
+            // Arrange
+            _documentRepositoryMock
+                .Setup(x => x.GetByIdAsync(It.IsAny<int>()))
+                .ReturnsAsync((Document?)null);
+
+            // Act
+            var result = await _documentService.Remove(1);
+
+            // Assert
+            Assert.False(result);
+
+            _documentStorageMock.Verify(
+                x => x.DeleteAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()),
+                Times.Never);
+
+            _documentRepositoryMock.Verify(
+                x => x.RemoveAsync(It.IsAny<Document>()),
+                Times.Never);
+        }
+
+        [Fact]
+        public async Task Remove_ShouldDeleteBlobAndDocument_WhenDocumentExists()
+        {
+            // Arrange
+            var document = new Document(
+                "document.pdf",
+                "document-123.pdf",
+                "documents",
+                "application/pdf",
+                100,
+                "Active");
+
+            _documentRepositoryMock
+                .Setup(x => x.GetByIdAsync(It.IsAny<int>()))
+                .ReturnsAsync(document);
+
+            _documentStorageMock
+                .Setup(x => x.DeleteAsync(
+                    document.BlobName,
+                    It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
+            _documentRepositoryMock
+                .Setup(x => x.RemoveAsync(document))
+                .ReturnsAsync(document);
+
+            // Act
+            var result = await _documentService.Remove(1);
+
+            // Assert
+            Assert.True(result);
+
+            _documentStorageMock.Verify(
+                x => x.DeleteAsync(
+                    document.BlobName,
+                    It.IsAny<CancellationToken>()),
+                Times.Once);
+
+            _documentRepositoryMock.Verify(
+                x => x.RemoveAsync(document),
+                Times.Once);
+        }
+
+        [Fact]
+        public async Task Download_ShouldReturnNull_WhenDocumentDoesNotExist()
+        {
+            // Arrange
+            _documentRepositoryMock
+                .Setup(x => x.GetByIdAsync(It.IsAny<int>()))
+                .ReturnsAsync((Document?)null);
+
+            // Act
+            var result = await _documentService.Download(1);
+
+            // Assert
+            Assert.Null(result);
+
+            _documentStorageMock.Verify(
+                x => x.DownloadAsync(
+                    It.IsAny<string>(),
+                    It.IsAny<CancellationToken>()),
+                Times.Never);
+        }
+
+        [Fact]
+        public async Task Download_ShouldReturnDocumentDownloadDTO_WhenDocumentExists()
+        {
+            // Arrange
+            var document = new Document(
+                "document.pdf",
+                "document-123.pdf",
+                "documents",
+                "application/pdf",
+                100,
+                "Active");
+
+            var content = new MemoryStream(new byte[] { 1, 2, 3 });
+
+            _documentRepositoryMock
+                .Setup(x => x.GetByIdAsync(It.IsAny<int>()))
+                .ReturnsAsync(document);
+
+            _documentStorageMock
+                .Setup(x => x.DownloadAsync(
+                    document.BlobName,
+                    It.IsAny<CancellationToken>()))
+                .ReturnsAsync(content);
+
+            // Act
+            var result = await _documentService.Download(1);
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(content, result.Content);
+            Assert.Equal(document.ContentType, result.ContentType);
+            Assert.Equal(document.OriginalFileName, result.FileName);
+
+            _documentStorageMock.Verify(
+                x => x.DownloadAsync(
+                    document.BlobName,
+                    It.IsAny<CancellationToken>()),
+                Times.Once);
+        }
     }
 }
