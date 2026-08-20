@@ -54,6 +54,21 @@ namespace AzurePlayground.Api.Controllers
             return Ok(document);
         }
 
+        [HttpGet("download/{id:int}")]
+        public async Task<ActionResult> Download(int id)
+        {
+            var documentDownloadDTO = await _documentService.Download(id);
+
+            if (documentDownloadDTO == null)
+                return NotFound();
+
+            return File(
+                documentDownloadDTO.Content,
+                documentDownloadDTO.ContentType,
+                documentDownloadDTO.FileName
+                );
+        }
+
         [HttpPut]
         public async Task<ActionResult> Update([FromBody] DocumentDTO documentDTO)
         {
@@ -68,7 +83,9 @@ namespace AzurePlayground.Api.Controllers
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> Remove(int id)
         {
-            await _documentService.Remove(id);
+            var removed = await _documentService.Remove(id);
+
+            if (removed == false) return NotFound();
 
             return NoContent();
         }

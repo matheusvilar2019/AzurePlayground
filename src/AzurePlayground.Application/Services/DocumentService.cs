@@ -32,7 +32,7 @@ namespace AzurePlayground.Application.Services
             return _mapper.Map<IEnumerable<DocumentDTO>>(documentsEntity);
         }
 
-        public async Task<DocumentDTO> GetById(int? id)
+        public async Task<DocumentDTO> GetById(int id)
         {
             var documentEntity = await _documentRepository.GetByIdAsync(id);
             return _mapper.Map<DocumentDTO>(documentEntity);
@@ -74,16 +74,40 @@ namespace AzurePlayground.Application.Services
             }
         }
 
+        public async Task<DocumentDownloadDTO?> Download(int id)
+        {
+            var documentEntity = await _documentRepository.GetByIdAsync(id);
+
+            if (documentEntity == null) return null;
+
+            var file = await _documentStorage.DownloadAsync(documentEntity.BlobName);
+
+            var DTO = new DocumentDownloadDTO
+            {
+                Content = file,
+                ContentType = documentEntity.ContentType,
+                FileName = documentEntity.OriginalFileName
+            };
+
+            return DTO;
+        }
+
         public async Task Update(DocumentDTO documentDTO)
         {
             var documentEntity = _mapper.Map<Document>(documentDTO);
             await _documentRepository.UpdateAsync(documentEntity);
         }
 
-        public async Task Remove(int? id)
+        public async Task<bool> Remove(int id)
         {
-            var documentEntity = _documentRepository.GetByIdAsync(id).Result;
-            await _documentRepository.RemoveAsync(documentEntity);
+            var document = await _documentRepository.GetByIdAsync(id);
+
+            if (document == null) return false;
+
+            await _documentStorage.DeleteAsync(document.BlobName);
+            await _documentRepository.RemoveAsync(document);
+
+            return true;
         }
     }
 }
