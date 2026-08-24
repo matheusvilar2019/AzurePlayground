@@ -4,6 +4,7 @@ using AzurePlayground.Application.Interfaces;
 using AzurePlayground.Application.Services;
 using AzurePlayground.Domain.Entities;
 using AzurePlayground.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ namespace AzurePlayground.Application.Tests
         private readonly Mock<IDocumentRepository> _documentRepositoryMock;
         private readonly Mock<IDocumentStorage> _documentStorageMock;
         private readonly Mock<IMapper> _mapperMock;
+        private readonly Mock<ILogger<DocumentService>> _mapperLogger;
 
         private readonly DocumentService _documentService;
 
@@ -27,11 +29,13 @@ namespace AzurePlayground.Application.Tests
             _documentRepositoryMock = new Mock<IDocumentRepository>();
             _documentStorageMock = new Mock<IDocumentStorage>();
             _mapperMock = new Mock<IMapper>();
+            _mapperLogger = new Mock<ILogger<DocumentService>>();
 
             _documentService = new DocumentService(
                 _mapperMock.Object,
                 _documentRepositoryMock.Object,
-                _documentStorageMock.Object);
+                _documentStorageMock.Object,
+                _mapperLogger.Object);
         }
 
         [Fact]

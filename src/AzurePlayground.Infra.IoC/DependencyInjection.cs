@@ -1,4 +1,5 @@
-﻿using AzurePlayground.Application.Interfaces;
+﻿using Azure.Storage.Blobs;
+using AzurePlayground.Application.Interfaces;
 using AzurePlayground.Application.Mappings;
 using AzurePlayground.Application.Services;
 using AzurePlayground.Domain.Interfaces;
@@ -45,6 +46,28 @@ namespace AzurePlayground.Infra.IoC
             new AzureBlobDocumentStorage(
                 connectionString,
                 containerName));
+
+            services.AddSingleton<BlobServiceClient>(serviceProvider =>
+            {
+                var configuration = serviceProvider
+                    .GetRequiredService<IConfiguration>();
+
+                var connectionString =
+                    configuration["AzureStorage:ConnectionString"];
+
+                return new BlobServiceClient(connectionString);
+            });
+
+            services.AddSingleton<BlobContainerClient>(serviceProvider =>
+            {
+                var blobServiceClient =
+                    serviceProvider.GetRequiredService<BlobServiceClient>();
+
+                var containerName =
+                    configuration["AzureStorage:ContainerName"];
+
+                return blobServiceClient.GetBlobContainerClient(containerName);
+            });
 
             return services;
         }

@@ -4,6 +4,7 @@ using AzurePlayground.Application.Interfaces;
 using AzurePlayground.Application.Validators;
 using AzurePlayground.Domain.Entities;
 using AzurePlayground.Domain.Interfaces;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,13 +18,21 @@ namespace AzurePlayground.Application.Services
         private IDocumentRepository _documentRepository;
         private readonly IDocumentStorage _documentStorage;
         private readonly IMapper _mapper;
+        private readonly ILogger<DocumentService> _logger;
 
-        public DocumentService(IMapper mapper, IDocumentRepository documentRepository, IDocumentStorage documentStorage)
+        public DocumentService(IMapper mapper, IDocumentRepository documentRepository, IDocumentStorage documentStorage, ILogger<DocumentService> logger)
         {
-            _documentRepository = documentRepository ??
-                throw new ArgumentNullException(nameof(documentRepository));
-            _documentStorage = documentStorage;
-            _mapper = mapper;
+            _documentRepository = documentRepository
+                ?? throw new ArgumentNullException(nameof(documentRepository));
+
+            _documentStorage = documentStorage
+                ?? throw new ArgumentNullException(nameof(documentStorage));
+
+            _mapper = mapper
+                ?? throw new ArgumentNullException(nameof(mapper));
+
+            _logger = logger
+                ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<IEnumerable<DocumentListDTO>> GetDocuments()
@@ -62,6 +71,12 @@ namespace AzurePlayground.Application.Services
 
         public async Task<DocumentDTO> Add(DocumentUploadDTO documentUploadDTO)
         {
+            _logger.LogInformation(
+                "Starting document upload. FileName: {FileName}, ContentType: {ContentType}, Size: {Size}",
+                documentUploadDTO.OriginalFileName,
+                documentUploadDTO.ContentType,
+                documentUploadDTO.Content.Length);
+
             DocumentValidator.Validate(documentUploadDTO);
 
             var blobName = $"{Guid.NewGuid()}{Path.GetExtension(documentUploadDTO.OriginalFileName)}";
@@ -83,6 +98,10 @@ namespace AzurePlayground.Application.Services
                 blobName,
                 documentUploadDTO.ContentType);
 
+            _logger.LogInformation(
+                "Document uploaded to storage successfully. BlobName: {BlobName}",
+                document.BlobName);
+
             try
             {
                 var documentEntity = await _documentRepository.CreateAsync(document);
@@ -98,20 +117,28 @@ namespace AzurePlayground.Application.Services
 
         public async Task<DocumentDownloadDTO?> Download(int id)
         {
+            _logger.LogInformation("Starting document download. DocumentId: {DocumentId}", id);
             var documentEntity = await _documentRepository.GetByIdAsync(id);
 
-            if (documentEntity == null) return null;
+            if (documentEntity == null)
+            {
+                _logger.LogWarning("Document not found for download. DocumentId: {DocumentId}", id);
+                return null;
+            }
 
             var file = await _documentStorage.DownloadAsync(documentEntity.BlobName);
 
-            var DTO = new DocumentDownloadDTO
+            _logger.LogInformation(
+                "Document downloaded successfully. DocumentId: {DocumentId}, BlobName: {BlobName}",
+                id,
+                documentEntity.BlobName);
+
+            return new DocumentDownloadDTO
             {
                 Content = file,
                 ContentType = documentEntity.ContentType,
                 FileName = documentEntity.OriginalFileName
             };
-
-            return DTO;
         }
 
         public async Task Update(DocumentDTO documentDTO)
@@ -122,12 +149,29 @@ namespace AzurePlayground.Application.Services
 
         public async Task<bool> Remove(int id)
         {
+            _logger.LogInformation("Starting document removal. DocumentId: {DocumentId}", id);
+
             var document = await _documentRepository.GetByIdAsync(id);
 
-            if (document == null) return false;
+            if (document == null)
+            {
+                _logger.LogWarning("Document not found for removal. DocumentId: {DocumentId}", id);
+                return false;
+            }
 
             await _documentStorage.DeleteAsync(document.BlobName);
+
+            _logger.LogInformation(
+                "Document blob removed successfully. DocumentId: {DocumentId}, BlobName: {BlobName}",
+                id,
+                document.BlobName);
+
             await _documentRepository.RemoveAsync(document);
+
+            _logger.LogInformation(
+                "Document metadata removed successfully. DocumentId: {DocumentId}, BlobName: {BlobName}",
+                id,
+                document.BlobName);
 
             return true;
         }
