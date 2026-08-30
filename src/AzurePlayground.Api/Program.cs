@@ -68,7 +68,7 @@ using (var scope = app.Services.CreateScope())
 {
     var queueService =
         scope.ServiceProvider
-            .GetRequiredService<IDocumentQueueService>();
+            .GetRequiredService<IDocumentQueue>();
 
     await queueService.EnsureQueueExistsAsync();
 }

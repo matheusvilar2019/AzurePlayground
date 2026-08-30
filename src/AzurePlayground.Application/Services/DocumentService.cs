@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mime;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,16 +18,20 @@ namespace AzurePlayground.Application.Services
     {
         private IDocumentRepository _documentRepository;
         private readonly IDocumentStorage _documentStorage;
+        private readonly IDocumentQueue _documentQueue;
         private readonly IMapper _mapper;
         private readonly ILogger<DocumentService> _logger;
 
-        public DocumentService(IMapper mapper, IDocumentRepository documentRepository, IDocumentStorage documentStorage, ILogger<DocumentService> logger)
+        public DocumentService(IMapper mapper, IDocumentRepository documentRepository, IDocumentStorage documentStorage, IDocumentQueue documentQueue, ILogger<DocumentService> logger)
         {
             _documentRepository = documentRepository
                 ?? throw new ArgumentNullException(nameof(documentRepository));
 
             _documentStorage = documentStorage
                 ?? throw new ArgumentNullException(nameof(documentStorage));
+
+            _documentQueue = documentQueue
+                ?? throw new ArgumentNullException(nameof(documentQueue));
 
             _mapper = mapper
                 ?? throw new ArgumentNullException(nameof(mapper));
@@ -105,6 +110,16 @@ namespace AzurePlayground.Application.Services
             try
             {
                 var documentEntity = await _documentRepository.CreateAsync(document);
+
+                var documentQueueDTO = new DocumentProcessingMessageDTO
+                {
+                    DocumentId = document.Id,
+                    FileName = document.OriginalFileName,
+                    ContentType = document.ContentType,
+                    UploadedAt = document.UploadedAt
+                };
+
+                await _documentQueue.SendMessageAsync(documentQueueDTO);
 
                 _logger.LogInformation(
                     "Document metadata persisted successfully. DocumentId: {DocumentId}, BlobName: {BlobName}",

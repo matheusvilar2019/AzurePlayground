@@ -78,7 +78,7 @@ namespace AzurePlayground.Infra.IoC
                     connectionString,
                     queueName));
 
-            services.AddScoped<IDocumentQueueService, AzureQueueDocumentService>();
+            services.AddScoped<IDocumentQueue, AzureQueueClient>();
 
             return services;
         }
