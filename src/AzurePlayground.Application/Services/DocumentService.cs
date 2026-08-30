@@ -106,11 +106,26 @@ namespace AzurePlayground.Application.Services
             {
                 var documentEntity = await _documentRepository.CreateAsync(document);
 
+                _logger.LogInformation(
+                    "Document metadata persisted successfully. DocumentId: {DocumentId}, BlobName: {BlobName}",
+                    documentEntity.Id,
+                    blobName);
+
                 return _mapper.Map<DocumentDTO>(documentEntity);
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(
+                    ex,
+                    "Failed to persist document metadata. Starting blob compensation. BlobName: {BlobName}",
+                    blobName);
+
                 await _documentStorage.DeleteAsync(blobName);
+
+                _logger.LogInformation(
+                    "Blob compensation completed successfully. BlobName: {BlobName}",
+                    blobName);
+
                 throw;
             }
         }
