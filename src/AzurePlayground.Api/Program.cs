@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Serilog;
 using HealthChecks.UI.Client;
+using AzurePlayground.Application.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -62,5 +63,14 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var queueService =
+        scope.ServiceProvider
+            .GetRequiredService<IDocumentQueueService>();
+
+    await queueService.EnsureQueueExistsAsync();
+}
 
 app.Run();

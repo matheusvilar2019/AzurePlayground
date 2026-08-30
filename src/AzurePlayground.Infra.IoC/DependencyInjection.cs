@@ -1,9 +1,11 @@
 ﻿using Azure.Storage.Blobs;
+using Azure.Storage.Queues;
 using AzurePlayground.Application.Interfaces;
 using AzurePlayground.Application.Mappings;
 using AzurePlayground.Application.Services;
 using AzurePlayground.Domain.Interfaces;
 using AzurePlayground.Infra.Data.Context;
+using AzurePlayground.Infra.Data.Queue;
 using AzurePlayground.Infra.Data.Repositories;
 using AzurePlayground.Infra.Data.Storage;
 using Microsoft.EntityFrameworkCore;
@@ -68,6 +70,15 @@ namespace AzurePlayground.Infra.IoC
 
                 return blobServiceClient.GetBlobContainerClient(containerName);
             });
+
+            const string queueName = "document-processing";
+
+            services.AddSingleton(
+                new QueueClient(
+                    connectionString,
+                    queueName));
+
+            services.AddScoped<IDocumentQueueService, AzureQueueDocumentService>();
 
             return services;
         }
