@@ -9,11 +9,14 @@ public class Worker : BackgroundService
 {
     private readonly ILogger<Worker> _logger;
     private readonly QueueClient _queueClient;
+    private readonly QueueClient _poisonQueueClient;
+    private const int _maxAttempts = 3;
 
-    public Worker(ILogger<Worker> logger, QueueClient queueClient)
+    public Worker(ILogger<Worker> logger, [FromKeyedServices("document-processing")] QueueClient queueClient, [FromKeyedServices("document-processing-poison")] QueueClient poisonQueueClient)
     {
         _logger = logger;
         _queueClient = queueClient;
+        _poisonQueueClient = poisonQueueClient;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -33,6 +36,16 @@ public class Worker : BackgroundService
                 {
                     try
                     {
+                        if (message.DequeueCount >= _maxAttempts)
+                        {
+                            await _poisonQueueClient.SendMessageAsync(message.Body.ToString(), stoppingToken);
+                            await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
+
+                            _logger.LogWarning("Message moved to Poison Queue. MessageId: {MessageId}, Attempts: {Attempts}", message.MessageId, message.DequeueCount);
+
+                            continue;
+                        }
+
                         await ProcessDocumentAsync(documentMessage, stoppingToken);
 
                         await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, stoppingToken);
