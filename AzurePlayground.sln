@@ -33,7 +33,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzurePlayground.Infra.Data.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzurePlayground.Application.Tests", "tests\AzurePlayground.Application.Tests\AzurePlayground.Application.Tests.csproj", "{11A85D6B-1FC8-4591-84CB-8EE4AE9B7E16}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzurePlayground.DocumentProcessor.Worker", "src\AzurePlayground.DocumentProcessor.Worker\AzurePlayground.DocumentProcessor.Worker.csproj", "{FDE25EA0-08EB-4367-918D-492166681D89}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AzurePlayground.DocumentProcessor.Worker", "src\AzurePlayground.DocumentProcessor.Worker\AzurePlayground.DocumentProcessor.Worker.csproj", "{FDE25EA0-08EB-4367-918D-492166681D89}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzurePlayground.DocumentProcessor.Worker.Tests", "tests\AzurePlayground.DocumentProcessor.Worker.Tests\AzurePlayground.DocumentProcessor.Worker.Tests.csproj", "{75A3D430-6CF2-48F8-B12E-5B64763697ED}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -77,6 +79,10 @@ Global
 		{FDE25EA0-08EB-4367-918D-492166681D89}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FDE25EA0-08EB-4367-918D-492166681D89}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FDE25EA0-08EB-4367-918D-492166681D89}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75A3D430-6CF2-48F8-B12E-5B64763697ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75A3D430-6CF2-48F8-B12E-5B64763697ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75A3D430-6CF2-48F8-B12E-5B64763697ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75A3D430-6CF2-48F8-B12E-5B64763697ED}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -91,6 +97,7 @@ Global
 		{60FE7E8A-C684-4C19-BE04-436C87CC1F93} = {DA41F8AC-D107-46C1-8E6B-04A57ED25DED}
 		{11A85D6B-1FC8-4591-84CB-8EE4AE9B7E16} = {DA41F8AC-D107-46C1-8E6B-04A57ED25DED}
 		{FDE25EA0-08EB-4367-918D-492166681D89} = {A7F38959-D4EE-46F6-8F5C-1FD44E4AE2BA}
+		{75A3D430-6CF2-48F8-B12E-5B64763697ED} = {DA41F8AC-D107-46C1-8E6B-04A57ED25DED}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {84C5FBDE-86BC-48F6-8D62-A23C0199F6E2}

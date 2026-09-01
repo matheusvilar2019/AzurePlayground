@@ -15,6 +15,7 @@ var poisonQueueClient = new QueueClient(connectionString, poisonQueueName);
 await queueClient.CreateIfNotExistsAsync();
 await poisonQueueClient.CreateIfNotExistsAsync();
 
+builder.Services.AddSingleton<DocumentQueueProcessor>();
 builder.Services.AddKeyedSingleton("document-processing", queueClient);
 builder.Services.AddKeyedSingleton("document-processing-poison", poisonQueueClient);
 
